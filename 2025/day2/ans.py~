@@ -1,0 +1,42 @@
+def isInvalid(id):
+    idLen = len(id)
+    return idLen % 2 == 0 and id[:idLen//2] == id[idLen//2:]
+
+def isInvalidPart2(id):
+    potRepStrs = []
+    for i in range(1, len(id)//2 + 1):
+        potRepStrs.append(id[0:i])
+    
+    for p in potRepStrs:
+        parts = id.split(p)
+        if all(p == '' for p in parts):
+            return True
+    return False
+
+
+def main(input):
+    ranges = input.split(',')
+    invalidIdCount = 0
+    seenInvalidIds = set()
+    for rangeStr in ranges: 
+        rangeList = rangeStr.replace('\n', '').split('-')
+        beg,end = rangeList
+        for i in range(int(beg), int(end) + 1):
+            if isInvalidPart2(str(i)):
+                print(i)
+                seenInvalidIds.add(i)
+    invalidIdCount = sum(seenInvalidIds)
+    print(f'final answer: {invalidIdCount}')
+            
+
+
+if __name__ == '__main__':
+    f = open('example.txt')
+    input = f.readline()
+    f.close()
+    main(input)
+    f = open('input.txt')
+    input = f.readline()
+    f.close()
+    #main(input)
+
