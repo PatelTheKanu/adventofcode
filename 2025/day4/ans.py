@@ -46,6 +46,7 @@ def getNumRollsInAdjPos(grid, row, col):
 
     
 def getNumAccessibleRolls(grid):
+    """Part 1"""
     numAccessibleRolls = 0
     rows = range(len(grid))
     for row in rows:
@@ -56,12 +57,37 @@ def getNumAccessibleRolls(grid):
 
     return numAccessibleRolls
 
+def getAccessibleRolls(grid):
+    """Part 2"""
+    accessibleRolls = []
+    rows = range(len(grid))
+    for row in rows:
+        cols = range(len(grid[row].replace('\n', '')))
+        for col in cols:
+            if isRoll(grid, row, col) and getNumRollsInAdjPos(grid, row, col) <= NUM_ALLOWED_ROLLS_IN_ADJ_POS:
+                accessibleRolls.append((row, col))
+
+    return accessibleRolls
+
+def removeRolls(grid, accessibleRolls):
+    """Part 2"""
+    for row, col in accessibleRolls:
+        grid[row] = grid[row][:col] + 'x' + grid[row][col+1:]
+    return grid
 
 def main():
     f = open('input.txt')
     origGrid = f.readlines()
     numAccessibleRolls = getNumAccessibleRolls(origGrid)
     print(f'accessbileRolls: {numAccessibleRolls}')
+    grid = deepcopy(origGrid)
+    accessibleRolls = getAccessibleRolls(grid)
+    numRemoved = 0
+    while accessibleRolls:
+        numRemoved += len(accessibleRolls)
+        removeRolls(grid, accessibleRolls)
+        accessibleRolls = getAccessibleRolls(grid)
+    print(f'Num rolls removed: {numRemoved}')
 
 
 
