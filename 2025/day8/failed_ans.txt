@@ -1,0 +1,4 @@
+1620 - 1000 connections but counting two junctions as two pairs
+600 - full input but I think this is with exmaple.txt aka while distances
+82476000 - full input aka while distainces
+8160 - counting each iteration as 1
