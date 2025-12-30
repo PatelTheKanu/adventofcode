@@ -1,5 +1,7 @@
-import math
 from heapq import heappush, heappop
+import matplotlib.pyplot as plt
+import matplotlib.path as mpltPath
+from shapely.geometry import Polygon, Point
 
 def getArea(p,q):
     x = abs(p[0] - q[0]) + 1
@@ -77,13 +79,78 @@ def getRestrictedAreaHeap(coords):
                 heappush(h, (-getArea(p,q), p, q))
     return h
 
-def main():
-    f = open('example.txt')
-    coords = getCoords(f.readlines())
-    h = getAreaHeap(coords)
-    print(heappop(h))
-    h = getRestrictedAreaHeap(coords)
-    print(heappop(h))
 
+
+def rectangle_in_polygon(rect_points, polygon):
+    """
+    rect_points: list of (x, y) for the 4 rectangle corners in order
+    poly_points: list of (x, y) for the polygon boundary (all edge points)
+    """
+
+    # Build geometric objects
+    rectangle = Polygon(rect_points)
+
+    # --- 1. Check if every rectangle corner is inside or on boundary
+    for pt in rect_points:
+        p = Point(pt)
+        if not (polygon.contains(p) or polygon.touches(p)):
+            return False  # A corner is outside
+
+    # --- 2. Check if any rectangle edge intersects polygon boundary
+    # (this catches the cases you were missing)
+    if rectangle.crosses(polygon):
+        return False
+
+    # --- 3. Final containment check: rectangle must be fully inside
+    return polygon.contains(rectangle) or polygon.covers(rectangle)
+
+def getRectCorners(p, q):
+    if p[0] == q[0] or p[1] == q[1]:
+        return [p, q]  # degenerate edge case
+    return [
+        (p[0], p[1]),
+        (q[0], p[1]),
+        (q[0], q[1]),
+        (p[0], q[1])
+    ]
+
+def main():
+    f = open('input.txt')
+    coords = getCoords(f.readlines())
+    #path = mpltPath.Path(coords)
+    h = getAreaHeap(coords)
+    found = False
+    area, p, q = heappop(h)
+    corners = getRectCorners(p, q)
+
+
+    polygon = Polygon(coords + [coords[0]])
+    while len(corners) == 4 and not rectangle_in_polygon(corners, polygon):
+        area, p, q = heappop(h)
+        corners = getRectCorners(p, q)
+        #found = True
+        #for c in corners:
+        #    if c not in coords and not path.contains_point(c):
+        #        found = False
+        #        break
+        #if found:
+        #    print(f'{area}, {corners}')
+        #else:
+        #    area, p, q = heappop(h)
+        #    corners = getCorners(p, q)
+    print(f'{area}, {corners}')
+    plt.figure()
+    xs = [c[0] for c in coords]
+    ys = [c[1] for c in coords]
+    plt.plot(xs, ys, 's', color='red')
+    plt.fill(xs, ys, color='skyblue')
+    xs = [c[0] for c in corners]
+    ys = [c[1] for c in corners]
+    plt.plot(xs, ys, '*', color='yellow')
+    plt.fill(xs, ys, color='green')
+    plt.show()
+
+    
+        
 if __name__ == '__main__':
     main()
